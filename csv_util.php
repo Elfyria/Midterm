@@ -130,3 +130,22 @@ function getCSVSize(string $address) : int {
     $authRay = fileFetcher($address);
     return count($authRay);
 }
+/**
+* checks to make sure username and password are correct.
+*@param $uname holds the username to find. 
+*@param $pword holds the password to check against the password that is held.
+*@return boolean.
+*/
+function checkUser($uname,$pword){
+    $unamearr=fileFetcher("userandpassword.csv");
+    foreach ($unamearr as &$check){
+        if($check[0]==$uname){
+            if($check[1]==$pword) return true;                  //if password matches return true.
+            else 
+                {echo "Incorrect password.";                   //if password does not match, echo Incorrect password.
+                return false;}                                 // returns false.
+        }                                                   //checks username.
+    }                                                   //iterates through $unamearr.
+    echo "No such username.";                           // if username doesn't exist, echo No such username.
+    return false;                                       //return false.
+}
