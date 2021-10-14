@@ -137,7 +137,7 @@ function getCSVSize(string $address) : int {
 *@return boolean.
 */
 function checkUser($uname,$pword){
-    $unamearr=fileFetcher("userandpassword.csv");
+    $unamearr=fileFetcher("/assets/csv/userandpassword.csv");
     foreach ($unamearr as &$check){
         if($check[0]==$uname){
             if($check[1]==$pword) return true;                  //if password matches return true.
