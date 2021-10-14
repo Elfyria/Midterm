@@ -149,3 +149,32 @@ function checkUser($uname,$pword){
     echo "No such username.";                           // if username doesn't exist, echo No such username.
     return false;                                       //return false.
 }
+function newCheck($email,$uname,$pword){
+    $blistarr=fileFetcher("blacklist.csv");
+    $unamearr=fileFetcher("userandpassword.csv");
+    foreach ($blistarr as &$check) {
+        if($email==$check){
+            echo "Email is blacklisted.";
+            return false;
+        }
+    }
+    foreach ($unamearr as &$check) {
+        if($uname==$check[0]){
+            echo "Username is used.";
+            return false;
+        }
+    }
+    foreach ($unamearr as &$check) {
+        if($email==$check[2]){
+            echo "Email is used.";
+            return false;
+        }
+    }
+    if(count($pword)<8){
+        echo "Password is too short.";
+        return false;
+    }
+    $newUser = '\n'.$uname.'|'.$pword.'|'.$email;
+    file_put_contents("userandpassword.csv", $newUser, FILE_APPEND);
+    return true;
+}
