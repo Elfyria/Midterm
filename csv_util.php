@@ -188,6 +188,14 @@ function newCheck($email,$uname,$pword){
         echo "Password does not contain a number.";
         return false;
     }
+    if (preg_match('/[\'^()}{><>,]|', $pword)){
+        echo "Character not allowed.";
+        return false;
+    }
+    if(!eregi("^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,3})$", $email)) {
+        echo "Invalid email address.";
+        return false;
+    } 
     $newUser = '\n'.$uname.'|'.$pword.'|'.$email;
     file_put_contents("/assets/csv/userandpassword.csv", $newUser, FILE_APPEND);
     return true;
