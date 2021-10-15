@@ -32,18 +32,25 @@ function makeMan(string $quote, int $author, string $address): void {
  * @PARAM $selector string the key of the user you're looking to find
  * @return mixed returns reference to an array or index if found, if not, returns -1
  **/
-function huntMan(string $selector) {
+function huntMan(string $selector): object {
+    $obj= new stdClass();
     $csvMan = fileFetcher("./assets/csv/quotes.csv");       //get the array
     $authMan = fileFetcher("./assets/csv/authors.csv");       //get the array
     if ($selector >= count($csvMan) || $selector < 0) {
         die("invalid selector");
     }
 
-    $theLad = $csvMan[$selector];
-    array_push($theLad, $authMan[$theLad[1]]);
 
-    return $theLad;
+    $theLad = $csvMan[$selector];
+    
+    $obj-> fname=$authMan[$theLad[1]][0];
+    $obj-> lname=$authMan[$theLad[1]][1];
+    $obj-> quote=$theLad[0];
+    $obj-> source=$theLad[2];
+
+    return $obj;
 }
+
 
 /**
  * Converts a PHP array into a csv-formatted string, saves the string into a csv file line by line.
@@ -123,4 +130,17 @@ function deleteLine(string $address, int $line) {
 function getCSVSize(string $address) : int {
     $authRay = fileFetcher($address);
     return count($authRay);
+}
+function checkUser($uname,$pword){
+    $unamearr=fileFetcher("userandpassword.csv");
+    foreach ($unamearr as &$check){
+        if($check[0]==$uname){
+            if($check[1]==$pword) return true;                  //if password matches return true.
+            else 
+                {echo "Incorrect password.";                   //if password does not match, echo Incorrect password.
+                return false;}                                 // returns false.
+        }                                                   //checks username.
+    }                                                   //iterates through $unamearr.
+    echo "No such username.";                           // if username doesn't exist, echo No such username.
+    return false;                                       //return false.
 }

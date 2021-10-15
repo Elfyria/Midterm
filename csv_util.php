@@ -130,3 +130,73 @@ function getCSVSize(string $address) : int {
     $authRay = fileFetcher($address);
     return count($authRay);
 }
+/**
+* checks to make sure username and password are correct.
+*@param $uname holds the username to find. 
+*@param $pword holds the password to check against the password that is held.
+*@return boolean.
+*/
+function checkUser($uname,$pword){
+    $unamearr=fileFetcher("/assets/csv/userandpassword.csv");
+    foreach ($unamearr as &$check){
+        if($check[0]==$uname){
+            if($check[1]==$pword) return true;                  //if password matches return true.
+            else 
+                {echo "Incorrect password.";                   //if password does not match, echo Incorrect password.
+                return false;}                                 // returns false.
+        }                                                   //checks username.
+    }                                                   //iterates through $unamearr.
+    echo "No such username.";                           // if username doesn't exist, echo No such username.
+    return false;                                       //return false.
+}
+function newCheck($email,$uname,$pword){
+    $blistarr=fileFetcher("/assets/csv/blacklist.csv");
+    $unamearr=fileFetcher("/assets/csv/userandpassword.csv");
+    $hasnum=false;
+    foreach ($blistarr as &$check) {
+        if($email==$check){
+            echo "Email is blacklisted.";
+            return false;
+        }
+    }
+    foreach ($unamearr as &$check) {
+        if($uname==$check[0]){
+            echo "Username is used.";
+            return false;
+        }
+    }
+    foreach ($unamearr as &$check) {
+        if($email==$check[2]){
+            echo "Email is used.";
+            return false;
+        }
+    }
+    if(count($pword)<8){
+        echo "Password is too short.";
+        return false;
+    }
+    for($i=0;$i<count($pword);$i++){
+        for($f=0;$f<10;$f++){
+            if($pword[$i]==$f){
+                $hasnum=true;
+                break;
+            }
+         }
+        if($hasnum) break;
+    }
+    if(!$hasnum){
+        echo "Password does not contain a number.";
+        return false;
+    }
+    if (preg_match('/[\'^()}{><>,]|', $pword)){
+        echo "Character not allowed.";
+        return false;
+    }
+    if(!eregi("^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,3})$", $email)) {
+        echo "Invalid email address.";
+        return false;
+    } 
+    $newUser = '\n'.$uname.'|'.$pword.'|'.$email;
+    file_put_contents("/assets/csv/userandpassword.csv", $newUser, FILE_APPEND);
+    return true;
+}
