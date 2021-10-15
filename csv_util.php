@@ -150,8 +150,9 @@ function checkUser($uname,$pword){
     return false;                                       //return false.
 }
 function newCheck($email,$uname,$pword){
-    $blistarr=fileFetcher("blacklist.csv");
-    $unamearr=fileFetcher("userandpassword.csv");
+    $blistarr=fileFetcher("/assets/csv/blacklist.csv");
+    $unamearr=fileFetcher("/assets/csv/userandpassword.csv");
+    $hasnum=false;
     foreach ($blistarr as &$check) {
         if($email==$check){
             echo "Email is blacklisted.";
@@ -174,7 +175,20 @@ function newCheck($email,$uname,$pword){
         echo "Password is too short.";
         return false;
     }
+    for($i=0;$i<count($pword);$i++){
+        for($f=0;$f<10;$f++){
+            if($pword[$i]==$f){
+                $hasnum=true;
+                break;
+            }
+         }
+        if($hasnum) break;
+    }
+    if(!$hasnum){
+        echo "Password does not contain a number.";
+        return false;
+    }
     $newUser = '\n'.$uname.'|'.$pword.'|'.$email;
-    file_put_contents("userandpassword.csv", $newUser, FILE_APPEND);
+    file_put_contents("/assets/csv/userandpassword.csv", $newUser, FILE_APPEND);
     return true;
 }
