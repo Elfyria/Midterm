@@ -6,25 +6,7 @@
  */
 function fileFetcher(string $address): array {
     $csv_src = file_get_contents($address);
-    $csv_rows = str_getcsv($csv_src, "\n");
-
-    for ($i = 0; $i < count($csv_rows); $i++) {
-        $csv_rows[$i] = str_getcsv($csv_rows[$i], "|");
-    }
-    return $csv_rows;
-}
-
-/**
- * Duplicates a random entry, pushes it to the end of the array and saves the array to the source json file.
- * String for file path is static.
- * @param string $quote the quote you want to add
- * @param int $author the ID of the author
- * @param string $address the address of the file to which the quote is appeneded
- */
-function makeMan(string $quote, int $author, string $address): void {
-    $fileMan = fileFetcher($address);
-    array_push($fileMan, [$quote, $author]);
-    saveMan($fileMan, $address);
+    return str_getcsv($csv_src, "\n");
 }
 
 /**
@@ -32,17 +14,25 @@ function makeMan(string $quote, int $author, string $address): void {
  * @PARAM $selector string the key of the user you're looking to find
  * @return mixed returns reference to an array or index if found, if not, returns -1
  **/
-function huntMan(string $selector) {
-    $csvMan = fileFetcher("./assets/csv/quotes.csv");       //get the array
-    $authMan = fileFetcher("./assets/csv/authors.csv");       //get the array
-    if ($selector >= count($csvMan) || $selector < 0) {
-        die("invalid selector");
+function huntMan(string $selector): stdClass {
+    $obj = new stdClass();
+    $quoteMan = fileFetcher("../assets/csv/quotes.csv");       //get the array
+    $authorMan = fileFetcher("../assets/csv/authors.csv");       //get the array
+    if ($selector >= count($quoteMan) || $selector < 0) {
+        die("<script> window.location = \"detail.php?id=0\"");
     }
 
-    $theLad = $csvMan[$selector];
-    array_push($theLad, $authMan[$theLad[1]]);
+    $theLad = $quoteMan[$selector];
+    $theLad = explode("|", $theLad);
+    $author = $authorMan[intval($theLad[1])];
+    $author = explode("|", $author);
 
-    return $theLad;
+    $obj-> fName=$author[0];
+    $obj-> lName=$author[1];
+    $obj-> quote=$theLad[0];
+    $obj-> aID=intval($theLad[1]);
+
+    return $obj;
 }
 
 /**
@@ -65,6 +55,24 @@ function saveMan(array &$csvman, string $address): void {
     }
 }
 
+/**
+ * Duplicates a random entry, pushes it to the end of the array and saves the array to the source json file.
+ * String for file path is static.
+ * @param string $quote the quote you want to add
+ * @param int $author the ID of the author
+ * @param string $address the address of the file to which the quote is appeneded
+ */
+function makeMan(string $quote, int $author, string $address): int {
+    $fileMan = fileFetcher($address);
+    $len = count($fileMan);
+    for ($i = 0; $i < $len; $i++) {
+        $fileMan[$i] = explode("|", $fileMan[$i]);
+    }
+    array_push($fileMan, [$quote, $author]);
+    saveMan($fileMan, $address);
+
+    return $len;
+}
 
 /**
  * puts a modified line at an index within a csv file
@@ -73,10 +81,13 @@ function saveMan(array &$csvman, string $address): void {
  * @param string $mod modified line
  */
 function modifyLine(string $address, int $line, string $mod, string $modAuth) {
-    $csvarr = fileFetcher($address);                                         //gets the file, $address, as an array.
-    if (count($csvarr) < $line) {                                            //if $line is too large,
+    $csvarr = fileFetcher($address);                                         //gets the file, $address, as an array.\
+    for ($i = 0; $i < count($csvarr); $i++) {
+        $csvarr[$i] = explode("|", $csvarr[$i]);
+    }
+    if (count($csvarr) < $line || $line < 0) {                                            //if $line is too large,
         echo "This line does not exist, " . $line . ",please try again.";    //outputs error message
-        die();                                                               //and kills program
+        die("<a href='../index.php'>Return Home</a>");                                                               //and kills program
     }
 
     $csvarr[$line][0] = $mod;                                                //sets the line to its modified version.
@@ -103,11 +114,14 @@ function emptyLine(string $address, int $line) {
  */
 function deleteLine(string $address, int $line) {
     $csvarr = fileFetcher($address);        // gets file at $address, as an array.
+    for ($i = 0; $i < count($csvarr); $i++) {
+        $csvarr[$i] = explode("|", $csvarr[$i]);
+    }
     $newarr = [];                           // initializes new array.
 
-    if (count($csvarr) < $line) {                                           // if line doesn't exist, kills program
+    if (count($csvarr) <= $line || $line < 0) {                                           // if line doesn't exist, kills program
         echo "This line does not exist," . $line . ",please try again.";
-        die();
+        die("<br><a href='../index.php'>Return Home</a>");
     }
 
     for ($i = 0; $line > $i; $i++) {
